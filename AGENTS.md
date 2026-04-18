@@ -12,6 +12,9 @@ pyproject.toml    # Dependencies and dev tools
 - Use `uv` for package management (lockfile: `uv.lock`)
 - Do not run `pytest` automatically
 
+## SQL Instructions
+- Use all the columns from the source tables. Do not select specific columns
+
 ## Commands
 ```bash
 # Install dependencies
