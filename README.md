@@ -6,4 +6,6 @@
 - `get_all_columns(schema: str | None = None, table: str | None = None) -> list[dict]`
 - `get_sample_data(schema: str | None = None, table: str | None = None, limit: int = 10) -> list[dict]`
 
+Each tool returns a `list[dict]`
+
 The connection to the databases are provided by `Adapter` subclasses. Each adapter implements the tools above. In addition, they implement `__enter__`, `__exit__`
