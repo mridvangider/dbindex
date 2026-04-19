@@ -72,24 +72,14 @@ class ExasolAdapter:
 
     def get_sample_data(
         self,
+        table: str,
         schema: Optional[str] = None,
-        table: Optional[str] = None,
         limit: int = 10,
     ) -> List[Dict]:
         """Get sample data from specified table(s)."""
-        if schema and table:
-            query = f"SELECT * FROM {schema}.{table} LIMIT {limit}"
-        elif table:
-            query = f"SELECT * FROM {table} LIMIT {limit}"
-        else:
-            # Default to first table found
-            tables = self.get_all_tables(schema)
-            if tables:
-                first_table = tables[0]["table"]
-                query = f"SELECT * FROM {schema}.{first_table} LIMIT {limit}" if schema else f"SELECT * FROM {first_table} LIMIT {limit}"
-            else:
-                return []
-
+        schema_str = f"{schema}." if schema else ""
+        query = f"SELECT * FROM {schema_str}{table} LIMIT {limit}"
+        
         result = self.__execute_and_fetch(query)
         return result
 
