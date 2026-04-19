@@ -41,33 +41,34 @@ class ExasolAdapter:
 
     def get_all_schemas(self) -> List[Dict]:
         """Get all available schemas."""
-        result = self.__execute_and_fetch("SHOW SCHEMAS")
-        return [{"schema": row["SCHEMA_NAME"]} for row in result]
+        result = self.__execute_and_fetch(
+            "SELECT * FROM EXA_DBA_SCHEMAS ORDER BY SCHEMA_NAME"
+        )
+        return result
 
     def get_all_tables(self, schema: Optional[str] = None) -> List[Dict]:
         """Get all tables in the database (or specific schema)."""
-        result = self.__execute_and_fetch(
-            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'"
-        )
         if schema:
-            return [{"table": row["TABLE_NAME"]} for row in result if row["TABLE_SCHEMA"] == schema]
-        return [{"table": row["TABLE_NAME"]} for row in result]
+            query = f"SELECT * FROM EXA_DBA_TABLES WHERE TABLE_SCHEMA = '{schema}' ORDER BY TABLE_NAME"
+        else:
+            query = "SELECT * FROM EXA_DBA_TABLES ORDER BY TABLE_SCHEMA, TABLE_NAME"
+
+        result = self.__execute_and_fetch(query)
+        return result
 
     def get_all_columns(
         self, schema: Optional[str] = None, table: Optional[str] = None
     ) -> List[Dict]:
         """Get all columns from specified table(s)."""
         if schema and table:
-            query = f"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' ORDER BY ORDINAL_POSITION"
+            query = f"SELECT * FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '{schema}' AND COLUMN_TABLE = '{table}' ORDER BY COLUMN_ORDINAL_POSITION"
         elif schema:
-            query = f"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{schema}' ORDER BY TABLE_NAME, ORDINAL_POSITION"
+            query = f"SELECT * FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '{schema}' ORDER BY COLUMN_TABLE, COLUMN_ORDINAL_POSITION"
         else:
-            query = "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS ORDER BY TABLE_NAME, ORDINAL_POSITION"
+            query = "SELECT * FROM EXA_DBA_COLUMNS ORDER BY COLUMN_SCHEMA, COLUMN_TABLE, COLUMN_ORDINAL_POSITION"
 
         result = self.__execute_and_fetch(query)
-        return [
-            {"column": row["COLUMN_NAME"], "data_type": row["DATA_TYPE"]} for row in result
-        ]
+        return result
 
     def __execute_and_fetch(
         self, query: str, params: dict | tuple | None = None
@@ -89,7 +90,7 @@ class ExasolAdapter:
         """Get sample data from specified table(s)."""
         schema_str = f"{schema}." if schema else ""
         query = f"SELECT * FROM {schema_str}{table} LIMIT {limit}"
-        
+
         result = self.__execute_and_fetch(query)
         return result
 
