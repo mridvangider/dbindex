@@ -11,6 +11,16 @@ class DBAdapter(ABC):
         pass
 
     @abstractmethod
+    def connect(self):
+        """Establish database connection"""
+        pass
+
+    @abstractmethod
+    def close(self):
+        """Close database connection"""
+        pass
+
+    @abstractmethod
     def get_all_schemas(self) -> List[Dict]:
         """Get all available schemas."""
         pass

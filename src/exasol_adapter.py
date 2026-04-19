@@ -14,6 +14,14 @@ class ExasolAdapter:
         self.connection_params = connection_params
         self._client = None
 
+    def connect(self):
+        """Establish database connection."""
+        self._connect()
+
+    def close(self):
+        """Close database connection."""
+        self._disconnect()
+
     def _connect(self):
         """Establish database connection."""
         if self._client is None:
