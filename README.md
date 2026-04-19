@@ -4,7 +4,7 @@
 - `get_all_schemas() -> list[dict]`
 - `get_all_tables(schema: str | None = None) -> list[dict]`
 - `get_all_columns(schema: str | None = None, table: str | None = None) -> list[dict]`
-- `get_sample_data(schema: str | None = None, table: str | None = None, limit: int = 10) -> list[dict]`
+- `get_sample_data(table: str, schema: str | None = None, limit: int = 10) -> list[dict]`
 
 Each tool returns a `list[dict]`
 
