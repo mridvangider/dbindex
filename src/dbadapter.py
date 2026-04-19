@@ -41,3 +41,8 @@ class DBAdapter(ABC):
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Exit point for context manager."""
         pass
+
+    @abstractmethod
+    def __execute_and_fetch(self, query: str, params: dict | tuple) -> list[dict]:
+        """Runs a query and returns the results"""
+        pass
