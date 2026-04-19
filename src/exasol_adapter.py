@@ -13,7 +13,7 @@ class ExasolAdapter:
         """
         self.connection_params = connection_params
         self.connection_params["fetch_dict"] = True
-        self.connection_params["auto_commit"] = False
+        self.connection_params["autocommit"] = False
         self._client = None
 
     def connect(self):
