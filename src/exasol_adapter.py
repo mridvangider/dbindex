@@ -12,6 +12,8 @@ class ExasolAdapter:
             connection_params: Dictionary containing host, port, user, password, secure
         """
         self.connection_params = connection_params
+        self.connection_params["fetch_dict"] = True
+        self.connection_params["auto_commit"] = False
         self._client = None
 
     def connect(self):
