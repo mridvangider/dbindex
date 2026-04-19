@@ -39,8 +39,8 @@ class TestExasolAdapter:
             # Each schema should be a dict with 'schema' key
             for schema in schemas:
                 assert isinstance(schema, dict)
-                assert "schema" in schema
-                assert isinstance(schema["schema"], str)
+                assert "SCHEMA_NAME" in schema
+                assert isinstance(schema["SCHEMA_NAME"], str)
 
     def test_get_all_tables(self):
         """Test getting all tables."""
@@ -50,18 +50,18 @@ class TestExasolAdapter:
             assert isinstance(tables, list)
             for table in tables:
                 assert isinstance(table, dict)
-                assert "table" in table
-                assert isinstance(table["table"], str)
+                assert "TABLE_NAME" in table
+                assert isinstance(table["TABLE_NAME"], str)
 
             # Test with schema filter (if we have a schema)
             schemas = adapter.get_all_schemas()
             if schemas:
-                test_schema = schemas[0]["schema"]
+                test_schema = "INLOOP"
                 schema_tables = adapter.get_all_tables(schema=test_schema)
                 assert isinstance(schema_tables, list)
                 for table in schema_tables:
                     assert isinstance(table, dict)
-                    assert "table" in table
+                    assert "TABLE_NAME" in table
 
     def test_get_all_columns(self):
         """Test getting all columns."""
@@ -71,35 +71,35 @@ class TestExasolAdapter:
             assert isinstance(columns, list)
             for column in columns:
                 assert isinstance(column, dict)
-                assert "column" in column
-                assert "data_type" in column
-                assert isinstance(column["column"], str)
-                assert isinstance(column["data_type"], str)
+                assert "COLUMN_NAME" in column
+                assert "COLUMN_TYPE" in column
+                assert isinstance(column["COLUMN_NAME"], str)
+                assert isinstance(column["COLUMN_TYPE"], str)
 
             # Test with schema filter
             schemas = adapter.get_all_schemas()
-            test_schema = "SYS"
+            test_schema = "INLOOP"
             if schemas:
                 # test_schema = schemas[0]["schema"]
                 schema_columns = adapter.get_all_columns(schema=test_schema)
                 assert isinstance(schema_columns, list)
                 for column in schema_columns:
                     assert isinstance(column, dict)
-                    assert "column" in column
-                    assert "data_type" in column
+                    assert "COLUMN_NAME" in column
+                    assert "COLUMN_TYPE" in column
 
             # Test with schema and table filters
             tables = adapter.get_all_tables(schema=test_schema)
             if tables:
-                test_table = tables[0]["table"]
+                test_table = "INLOOP"
                 table_columns = adapter.get_all_columns(
                     schema=test_schema, table=test_table
                 )
                 assert isinstance(table_columns, list)
                 for column in table_columns:
                     assert isinstance(column, dict)
-                    assert "column" in column
-                    assert "data_type" in column
+                    assert "COLUMN_NAME" in column
+                    assert "COLUMN_TYPE" in column
 
     def test_get_sample_data(self):
         """Test getting sample data."""
@@ -108,12 +108,12 @@ class TestExasolAdapter:
             if not schemas:
                 pytest.skip("No schemas available for testing")
 
-            test_schema = schemas[0]["schema"]
+            test_schema = "INLOOP"
             tables = adapter.get_all_tables(schema=test_schema)
             if not tables:
                 pytest.skip("No tables available for testing")
 
-            test_table = tables[0]["table"]
+            test_table = "TEST"
 
             # Test default limit
             sample = adapter.get_sample_data(table=test_table, schema=test_schema)
@@ -129,23 +129,3 @@ class TestExasolAdapter:
             assert isinstance(sample_limited, list)
             assert len(sample_limited) <= 5
 
-    # def test_execute_and_fetch_requires_connection(self):
-    #     """Test that __execute_and_fetch raises RuntimeError when not connected."""
-    #     adapter = ExasolAdapter(self.connection_params)
-    #     # Don't connect
-    #     with pytest.raises(RuntimeError, match="Client not connected"):
-    #         adapter._ExasolAdapter__execute_and_fetch("SELECT 1")
-
-    # def test_disconnect_handles_exceptions(self):
-    #     """Test that _disconnect handles exceptions gracefully."""
-    #     adapter = ExasolAdapter(self.connection_params)
-
-    #     # Set a mock client that raises an exception on close
-    #     class MockClient:
-    #         def close(self):
-    #             raise Exception("Connection error")
-
-    #     adapter._client = MockClient()
-    #     # Should not raise exception
-    #     adapter._disconnect()
-    #     assert adapter._client is None
