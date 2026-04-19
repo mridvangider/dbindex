@@ -5,6 +5,7 @@ description = "An MCP server to access metadata on databases"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "mcp[cli]>=1.27.0",
     "pyexasol>=2.2.0",
 ]
 
