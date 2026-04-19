@@ -29,10 +29,10 @@ uv run ruff check .
 
 ## Database Adapter Pattern
 All database adapters must implement the abstract methods in `DBAdapter`:
-- `get_all_schemas() -> List[Dict]`
-- `get_all_tables(schema: Optional[str]) -> List[Dict]`
-- `get_all_columns(schema, table) -> List[Dict]`
-- `get_sample_data(schema, table, limit=10) -> List[Dict]`
+- `get_all_schemas() -> list[dict]`
+- `get_all_tables(schema: str | None = None) -> list[dict]`
+- `get_all_columns(schema: str | None = None, table: str | None = None) -> list[dict]`
+- `get_sample_data(table: str, schema: str | None = None, limit: int = 10) -> list[dict]`
 - Context manager methods (`__enter__`, `__exit__`)
 
 ## Dependencies
