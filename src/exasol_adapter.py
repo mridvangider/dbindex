@@ -5,38 +5,19 @@ import pyexasol
 class ExasolAdapter:
     """Exasol database adapter using pyexasol client."""
 
-    def __init__(
-        self,
-        host: str = "localhost",
-        port: int = 8563,
-        user: str = "",
-        password: str = "",
-        secure: bool = False,
-    ):
+    def __init__(self, connection_params: dict):
         """Initialize Exasol connection.
 
         Args:
-            host: Exasol server hostname
-            port: Exasol server port
-            user: Database username
-            password: Database password
-            secure: Use SSL/TLS connection
+            connection_params: Dictionary containing host, port, user, password, secure
         """
-        self._connection_params = {
-            "host": host,
-            "port": port,
-            "user": user,
-            "password": password,
-            "secure": secure,
-            "auto_commit": False,
-            "fetch_dict": True,
-        }
+        self.connection_params = connection_params
         self._client = None
 
     def _connect(self):
         """Establish database connection."""
         if self._client is None:
-            self._client = pyexasol.connect(**self._connection_params)
+            self._client = pyexasol.connect(**self.connection_params)
 
     def _disconnect(self):
         """Close database connection."""

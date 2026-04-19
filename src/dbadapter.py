@@ -6,6 +6,11 @@ class DBAdapter(ABC):
     """Abstract base class for database adapters implementing MCP server tools."""
 
     @abstractmethod
+    def __init__(self, connection_params: dict):
+        """Initialize adapter with credential parameters"""
+        pass
+
+    @abstractmethod
     def get_all_schemas(self) -> List[Dict]:
         """Get all available schemas."""
         pass
