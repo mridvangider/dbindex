@@ -21,8 +21,7 @@ class AppContext:
         self.exasol_adapter = None
 
     def __enter__(self):
-        self.exasol_adapter = ExasolAdapter(connection_params=self.config.connection_parameters)
-        self.exasol_adapter.connect()
+        self.initialize()
         return self
     
     def __exit__(self, exc_type, exc, tb):
@@ -34,6 +33,13 @@ class AppContext:
         if not self._initialized:
             self._initialized = True
             self.exasol_adapter = ExasolAdapter(connection_params=self.config.connection_parameters)
+            self.exasol_adapter.connect()
+
+    def get_adapter(self) -> ExasolAdapter:
+        if self.exasol_adapter:
+            return self.exasol_adapter
+        else:
+            raise Exception("ExasolAdapar is null")
 
     
     @property
