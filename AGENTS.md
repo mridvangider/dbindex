@@ -9,8 +9,10 @@ pyproject.toml    # Dependencies and dev tools
 
 ## Python Setup
 - Requires Python **3.14+** (unusual version, ensure correct interpreter)
+- If `ruff` is installed, use `uv run ruff check {file}` to check the syntax
 - Use `uv` for package management (lockfile: `uv.lock`)
 - Do not run `pytest` automatically
+- Do not use mock, patch etc. in unit tests. Use env variables to connect to test database
 
 ## SQL Instructions
 - Use all the columns from the source tables. Do not select specific columns
