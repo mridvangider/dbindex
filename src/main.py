@@ -1,23 +1,24 @@
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
-from typing import Optional
+
 import json
 import sys
 
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.session import ServerSession
 
-from app_context import AppContext, AppConfig
+from dbindex.app_context import AppContext, AppConfig
+from dbindex.types import Primitive, Row
 
 
 def load_config(path: str) -> AppConfig:
     with open(path, "r") as f:
-        _config = json.load(f)
+        _config: dict[str, Primitive] = json.load(f)
         config = AppConfig.model_validate(_config)
         return config
 
 @asynccontextmanager
-async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
+async def app_lifespan(_: FastMCP) -> AsyncIterator[AppContext]:
     config_path = sys.argv[1]
     config = load_config(config_path)
     with AppContext(config) as context:
@@ -28,7 +29,7 @@ app = FastMCP("dbindex", lifespan=app_lifespan, json_response=True)
 
 # Access type-safe lifespan context in tools
 @app.tool()
-def get_all_schemas(ctx: Context[ServerSession, AppContext]) -> list[dict]:
+def get_all_schemas(ctx: Context[ServerSession, AppContext]) -> list[Row]:
     """Get all available schemas from the database.
     """
     adapter = ctx.request_context.lifespan_context.get_adapter()
@@ -37,8 +38,8 @@ def get_all_schemas(ctx: Context[ServerSession, AppContext]) -> list[dict]:
 
 @app.tool()
 def get_all_tables(
-    ctx: Context[ServerSession, AppContext], schema: Optional[str] = None
-) -> list[dict]:
+    ctx: Context[ServerSession, AppContext], schema: str | None = None
+) -> list[Row]:
     """Get all tables in the database (or specific schema).
 
     Args:
@@ -50,8 +51,8 @@ def get_all_tables(
 
 @app.tool()
 def get_all_columns(
-    ctx: Context[ServerSession, AppContext], schema: Optional[str] = None, table: Optional[str] = None
-) -> list[dict]:
+    ctx: Context[ServerSession, AppContext], schema: str | None = None, table: str | None = None
+) -> list[Row]:
     """Get all columns from specified table(s).
 
     Args:
@@ -71,9 +72,9 @@ def is_sample_data_enabled(ctx: Context[ServerSession, AppContext]) -> bool:
 def get_sample_data(
     ctx: Context[ServerSession, AppContext],
     table: str,
-    schema: Optional[str] = None,
+    schema: str | None = None,
     limit: int = 10
-) -> list[dict]:
+) -> list[Row]:
     """Get sample data from specified table(s). This function might be disabled by the mcp server config.
     In that case, this function returns empty table
 

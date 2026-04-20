@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from exasol_adapter import ExasolAdapter
+from .exasol_adapter import ExasolAdapter
 
 class AppConfig(BaseModel):
     """Application configuration model."""

@@ -1,20 +1,23 @@
-from typing import List, Dict, Optional, cast
+from typing import cast
+from types import TracebackType
 import pyexasol
+
+from dbindex.types import Primitive, Row
 
 
 class ExasolAdapter:
     """Exasol database adapter using pyexasol client."""
 
-    def __init__(self, connection_params: dict):
+    def __init__(self, connection_params: dict[str, Primitive]):
         """Initialize Exasol connection.
 
         Args:
-            connection_params: Dictionary containing host, port, user, password, secure
+            connection_params: dictionary containing host, port, user, password, secure
         """
-        self.connection_params = connection_params
+        self.connection_params: dict[str, Primitive] = connection_params
         self.connection_params["fetch_dict"] = True
         self.connection_params["autocommit"] = False
-        self._client = None
+        self._client: pyexasol.ExaConnection | None = None
 
     def connect(self):
         """Establish database connection."""
@@ -39,14 +42,14 @@ class ExasolAdapter:
             finally:
                 self._client = None
 
-    def get_all_schemas(self) -> List[Dict]:
+    def get_all_schemas(self) -> list[Row]:
         """Get all available schemas."""
         result = self.__execute_and_fetch(
             "SELECT * FROM EXA_DBA_SCHEMAS ORDER BY SCHEMA_NAME"
         )
         return result
 
-    def get_all_tables(self, schema: Optional[str] = None) -> List[Dict]:
+    def get_all_tables(self, schema: str | None = None) -> list[Row]:
         """Get all tables in the database (or specific schema)."""
         if schema:
             query = f"SELECT * FROM EXA_DBA_TABLES WHERE TABLE_SCHEMA = '{schema}' ORDER BY TABLE_NAME"
@@ -57,8 +60,8 @@ class ExasolAdapter:
         return result
 
     def get_all_columns(
-        self, schema: Optional[str] = None, table: Optional[str] = None
-    ) -> List[Dict]:
+        self, schema: str | None = None, table: str | None = None
+    ) -> list[Row]:
         """Get all columns from specified table(s)."""
         if schema and table:
             query = f"SELECT * FROM EXA_DBA_COLUMNS WHERE COLUMN_SCHEMA = '{schema}' AND COLUMN_TABLE = '{table}' ORDER BY COLUMN_ORDINAL_POSITION"
@@ -71,22 +74,22 @@ class ExasolAdapter:
         return result
 
     def __execute_and_fetch(
-        self, query: str, params: dict | tuple | None = None
-    ) -> list[dict]:
+        self, query: str, params: Row | None = None
+    ) -> list[Row]:
         """Execute a query and return results as list of dictionaries."""
         if self._client is None:
             raise RuntimeError("Client not connected. Use context manager first.")
 
-        with self._client.execute(query) as s:
-            rows = cast(list[dict], s.fetchall())
+        with self._client.execute(query, params) as s:
+            rows = cast(list[Row], s.fetchall())
             return rows
 
     def get_sample_data(
         self,
         table: str,
-        schema: Optional[str] = None,
+        schema: str | None = None,
         limit: int = 10,
-    ) -> List[Dict]:
+    ) -> list[Row]:
         """Get sample data from specified table(s)."""
         schema_str = f"{schema}." if schema else ""
         query = f"SELECT * FROM {schema_str}{table} LIMIT {limit}"
@@ -99,7 +102,7 @@ class ExasolAdapter:
         self._connect()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: type[BaseException], exc_val: BaseException, exc_tb: TracebackType):
         """Exit point for context manager."""
         self._disconnect()
         return False
