@@ -13,7 +13,7 @@ from app_context import AppContext, AppConfig
 def load_config(path: str) -> AppConfig:
     with open(path, "r") as f:
         _config = json.load(f)
-        config = AppConfig.model_validate_json(_config)
+        config = AppConfig.model_validate(_config)
         return config
 
 @asynccontextmanager
@@ -23,7 +23,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     with AppContext(config) as context:
         yield context
 
-app = FastMCP(lifespan=app_lifespan)
+app = FastMCP("dbindex", lifespan=app_lifespan, json_response=True)
 
 
 # Access type-safe lifespan context in tools
@@ -91,4 +91,4 @@ def get_sample_data(
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(transport="streamable-http")
