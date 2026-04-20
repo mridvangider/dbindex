@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 
 import json
+from pathlib import Path
 import sys
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -10,8 +11,9 @@ from mcp.server.session import ServerSession
 from dbindex.app_context import AppContext, AppConfig
 from dbindex.types import Primitive, Row
 
+config: AppConfig | None = None
 
-def load_config(path: str) -> AppConfig:
+def load_config(path: Path) -> AppConfig:
     with open(path, "r") as f:
         _config: dict[str, Primitive] = json.load(f)
         config = AppConfig.model_validate(_config)
@@ -19,8 +21,9 @@ def load_config(path: str) -> AppConfig:
 
 @asynccontextmanager
 async def app_lifespan(_: FastMCP) -> AsyncIterator[AppContext]:
-    config_path = sys.argv[1]
-    config = load_config(config_path)
+    if not config:
+        raise Exception("Config is not loaded")
+
     with AppContext(config) as context:
         yield context
 
@@ -92,4 +95,14 @@ def get_sample_data(
 
 
 if __name__ == "__main__":
-    app.run(transport="streamable-http")
+    import argparse
+
+    parser = argparse.ArgumentParser(prog="dbindex", description="An MCP server that provides access to database metadata")
+    _ = parser.add_argument('-c', '--config', type=Path, required=True)
+    _ = parser.add_argument('-t', '--transport', choices=['stdio', 'streamable-http'], required=True)
+    args = parser.parse_args(sys.argv)
+
+    config = load_config(args.config)
+    transport = args.transport
+
+    app.run(transport=transport)

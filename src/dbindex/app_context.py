@@ -1,14 +1,14 @@
-from pydantic import BaseModel, ConfigDict
+from types import TracebackType
+from pydantic import BaseModel
 from .exasol_adapter import ExasolAdapter
+from dbindex.types import Primitive
 
 class AppConfig(BaseModel):
     """Application configuration model."""
-    
-    model_config = ConfigDict(extra="allow")
-    
+
     app_name: str = "dbindex"
     debug: bool = False
-    connection_parameters: dict
+    connection_parameters: dict[str, Primitive] | None = None
     enable_sample_data: bool = False
 
 
@@ -16,21 +16,24 @@ class AppContext:
     """Application context class to hold shared state."""
     
     def __init__(self, config: AppConfig):
-        self.config = config
-        self._initialized = False
-        self.exasol_adapter = None
+        self.config: AppConfig = config
+        self._initialized: bool = False
+        self.exasol_adapter: ExasolAdapter | None = None
 
     def __enter__(self):
         self.initialize()
         return self
     
-    def __exit__(self, exc_type, exc, tb):
+    def __exit__(self, exc_type: type[BaseException], exc: BaseException, tb: TracebackType):
         if self.exasol_adapter:
             self.exasol_adapter.close()
     
     def initialize(self) -> None:
         """Initialize the application context."""
         if not self._initialized:
+            if not self.config.connection_parameters:
+                raise Exception("Connection parameters are not initialized")
+
             self._initialized = True
             self.exasol_adapter = ExasolAdapter(connection_params=self.config.connection_parameters)
             self.exasol_adapter.connect()

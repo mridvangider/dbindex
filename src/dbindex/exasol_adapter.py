@@ -30,7 +30,7 @@ class ExasolAdapter:
     def _connect(self):
         """Establish database connection."""
         if self._client is None:
-            self._client = pyexasol.connect(**self.connection_params)
+            self._client = pyexasol.connect(**self.connection_params) # pyright: ignore[reportUnknownMemberType]
 
     def _disconnect(self):
         """Close database connection."""
@@ -80,7 +80,7 @@ class ExasolAdapter:
         if self._client is None:
             raise RuntimeError("Client not connected. Use context manager first.")
 
-        with self._client.execute(query, params) as s:
+        with self._client.execute(query, params) as s: # pyright: ignore[reportUnknownMemberType]
             rows = cast(list[Row], s.fetchall())
             return rows
 
