@@ -20,3 +20,8 @@ dev = [
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = ["-v"]
+
+[tool.basedpyright]
+include = ["src"]
+
+reportAny = false
